@@ -1,23 +1,32 @@
 $tokens = {}
 $types = {}
 
-puts "LOCAL PYTH DOCS"
-puts "---------------\n\n"
-puts "Operators: "
-puts "ot - search operators by token"
-puts "oa - search operators by args"
-puts "ol - list operators"
-puts "od - search operators by description\n\n"
-puts "Types: "
-puts "tn - search types by name"
-puts "td - search types by description"
-puts "tl - list types"
-puts "quit - exit the program\n\n"
+def print_help
+  puts "LOCAL PYTH DOCS"
+  puts "---------------\n\n"
+  
+  puts "Operators: "
+  puts "ot - search operators by token"
+  puts "oa - search operators by args"
+  puts "ol - list operators"
+  puts "od - search operators by description\n\n"
+  
+  puts "Types: "
+  puts "tn - search types by name"
+  puts "td - search types by description"
+  puts "tl - list types\n\n"
+  
+  puts "System: "
+  puts "hp - print this"
+  puts "qt - exit the program\n\n"
+end
+
+print_help()
+
 puts "TIPS"
 puts "----"
 
-
-File.open("rev-doc.txt") do |f|
+File.open("/Users/christopherdumas/Downloads/offline-pyth-docs/rev-doc.txt") do |f|
   current_section = "Intro:"
   f.each_line do |line|
     line = line.chomp
@@ -27,11 +36,11 @@ File.open("rev-doc.txt") do |f|
     else
       if current_section == "Types:"
         kv = line.split(" = ")
-        $types[kv[0]] = kv[1]
+        $types[kv[0]] = kv[1] if not kv[0].nil? and not kv[1].nil?
       elsif current_section == "Shorthands:"
         puts(line)
       elsif current_section == "Tokens:"
-        s = line.split(/([A-Za-z]\s?[A-Za-z0-9.+*\-^%()]+\s)/)
+        s = line.split(/([A-Za-z]\s[A-Za-z.+*\-^%()]|[A-Za-z][A-Za-z0-9.+*\/\-^%\(\)]+\s)/)
         
         sp = s[0].split("")
         name = sp.take(2).join.strip
@@ -51,34 +60,36 @@ File.open("rev-doc.txt") do |f|
 end
 
 input = [""]
+JUST = 50
 
-while input[0] != "quit" do
+while input[0] != "qt" do
   $stdout << "> "
   input = gets.chomp.split
 
+  puts ''
   if input[0] == "ot" then
     tok = $tokens[input[1]]
 
     unless tok.nil? then
-      puts ''
       tok.each do |t|
-        puts "\e[31;6m#{t[:args]}\e[39;49m\t#{t[:desc]}"
+        len = JUST - "#{t[:args]}".length
+        ndesc = " " + "-"*(len-2) + " " + t[:desc]
+        puts "\e[31;6m#{t[:args]}\e[39;49m#{ndesc}"
       end
-      puts ''
     else
       puts "Operator '#{input[1]}' not found."
     end
   elsif input[0] == "oa" then
     $tokens.each do |k, v|
       v.each do |t|
-        if t[:args].include? input[1] then
-          puts "\e[31;6m#{t[:args]}\e[39;49m\t#{t[:desc]}"
+        if t[:args].downcase.include? input[1].downcase then
+          len = JUST - "#{t[:name]} #{t[:args]}".length
+          ndesc = " " + "-"*(len-2) + " " + t[:desc]
+          puts "#{t[:name]} \e[31;6m#{t[:args]}\e[39;49m#{ndesc}"
         end
       end
     end
   elsif input[0] == "ol" then
-    puts ''
-    
     puts "Letters:"
     puts $tokens.keys.reject { |k| k.upcase == k.downcase or k[0] == "." }.join "  "
     puts ''
@@ -89,19 +100,21 @@ while input[0] != "quit" do
 
     puts "Dots:"
     puts $tokens.keys.select { |k| k[0] == "." }.join "  "
-    
-    puts ''
   elsif input[0] == "od" then
     $tokens.each do |k, v|
       v.each do |t|
-        if t[:desc].include? input[1] then
-          puts "\e[31;6m#{t[:args]}\e[39;49m\t#{t[:desc]}"
+        if t[:desc].downcase.include? input[1].downcase then
+          len = JUST - "#{t[:name]} #{t[:args]}".length
+          ndesc = " " + "-"*(len-2) + " " + t[:desc].sub(input[1], "\e[31;6m"+input[1]+"\e[39;49m")
+          puts "#{t[:name]} \e[31;6m#{t[:args]}\e[39;49m#{ndesc}"
         end
       end
     end
   elsif input[0] == "tl" then
     $types.each do |k, v|
-      puts "#{k}  -  #{v}" if k != ""
+      len = JUST - k.length
+      nstr = "\e[31;6m" + k + "\e[39;49m " + "-"*(len-2) + " " + v
+      puts nstr if k != ""
     end
   elsif input[0] == "tn" then
     $types.each do |k, v|
@@ -109,9 +122,15 @@ while input[0] != "quit" do
     end
   elsif input[0] == "td" then
     $types.each do |k, v|
-      puts "#{k}  -  #{v}" if v.include?(input[1])
+      puts "#{k}  -  #{v}" if v.downcase.include?(input[1].downcase)
     end
+  elsif input[0] == "qt" then
+    puts "Bye!"
+  elsif input[0] == "hp" then
+    print_help()
   else
     puts "Unknown command, '#{input[0]}'"
   end
+
+  puts ''
 end

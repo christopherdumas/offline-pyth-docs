@@ -16,7 +16,7 @@ blk = a code block (any series of statements)
 n:_ = n _ arguments.
 var = variable. Not evaluated.
 func = function. Not evaluated.
-func n = function with arity n.
+funcn = function with arity n.
 pfn = Preceding function of arity n. *F, for instance.
 l:_ = Lambda with lambda variable(s) _
 pos = positive int.
@@ -118,7 +118,7 @@ C  <float>                C(floor(A))
 C  <cmp>                  Complex conjugate.
 C  <str>                  Convert A to int using base 256 and code points.
 C  <col>                  Matrix transpose, truncating to the length of the shortest entry.
-D  <func n> <n:var> <blk> Define a function. Same as def A(B...) in Python.
+D  <funcn> <n:var> <blk> Define a function. Same as def A(B...) in Python.
 D  <pfn> <n-1:any> <col>  Sort operator. Sort C with key A(_, B ...). Uses o underneath, B may refer to o's lambda var.
 E                         Evaluate input. Same as ast.literal_eval(input()) in Python.
 F  <pf1> <any> <int>      Apply repeatedly. A(A(A(A(... B ... )))), C times.
